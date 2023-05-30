@@ -1,0 +1,129 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}    
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if Auction_Listing.status == "closed" and Bid.user == user %}
+        <div class="alert alert-success" role="alert">
+            <h2 class="alert-heading">Congratulations {{ Bid.user }} !</h2>
+            <h3>You have won this auction.</h3>
+        </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md-4">
+            <img src= "{{ Auction_Listing.image }}" alt="Image" style="float:left; width: 100%; margin-left: 2px;">
+        </div>
+        <div class="col-md-4">
+            <div class="auction_list_section">
+                <h2>{{ Auction_Listing.title }}</h2>
+                <p>Description: {{ Auction_Listing.description }}</p>
+                <p>Starting Bid: ${{ Auction_Listing.start_bid }}</p>
+                <p>Listed by: {{ Auction_Listing.creator }}</p>
+                <p>Category: {{ Auction_Listing.category }}</p>
+                {% if Bid %}
+                    <h5>Highest Bid: ${{ Bid.bid }}</h5>
+                    <p>Bid by: {{ Bid.user }}</p>
+                {% else %}
+                    <p>No bids yet</p>
+                {% endif %}
+
+                {% if Auction_Listing.creator == request.user.username and Auction_Listing.status == "active" %}
+                    <form action="{% url 'close' Auction_Listing.id %}" method="post">
+                        {% csrf_token %}
+                        <input type="submit" class="btn btn-danger" value="Close this auction">
+                    </form>
+                {% elif Auction_Listing.status == "active" %}
+                    <div class="mb-3">
+                        <form action="{% url 'bid' Auction_Listing.id %}" method="post">
+                            {% csrf_token %}
+                            {{ form }}
+                            <button type="submit" class="btn btn-primary mb-2"> Bid </button>
+                        </form>
+                    </div>
+                {% else %} 
+                    <h5 class="text-danger">Auction for the current item is closed.</h5> 
+                {% endif %}
+                
+                <div style="margin-top: 20px;">
+                    {% if Watching %}
+                        <form action="{% url 'rem_watchlist' Auction_Listing.id %}" method="post">
+                            {% csrf_token %}
+                            <input type="submit" class="btn btn-danger" value="Remove from Watchlist">
+                        </form>
+                    {% else %}
+                        <form action="{% url 'add_watchlist' Auction_Listing.id %}" method="post">
+                            {% csrf_token %}
+                            <input type="submit" class="btn btn-secondary" value="Add to Watchlist">
+                        </form>
+                    {% endif %}
+
+                </div>
+                
+                <div style="clear: both; margin-bottom: 40px;"></div>
+
+            </div>
+            
+        </div>
+
+        <div class="col-md-3 border border-dark p-4">
+            <div class="comments">
+                <form action="{% url 'comment' Auction_Listing.id %}" method="post" style="margin-bottom: 20px;">
+                    {% csrf_token %} 
+                    <input style="width: 70%;" type="text" name="comment" placeholder="Write a comment">
+                    <input type="submit" value="Comment">
+                </form>
+                
+                <div class="">
+                    {% for comment in Comments %}
+                    <p>{{ comment.user }}--> {{ comment.comment }}</p>
+                    {% endfor %}
+                </div>
+                
+               
+                    
+                
+    
+    
+            </div>
+        </div>
+    </div>
+    
+
+    
+    <!--<h3>Users in Watchlist:</h3>
+    {% for users in Users_Watching %}
+        <ul><li>{{ users }}</li></ul>
+    {% endfor %}
+    -->
+
+
+
+    
+
+    
+
+
+    
+    
+
+  
+
+
+    
+
+  
+    
+{% endblock %}
